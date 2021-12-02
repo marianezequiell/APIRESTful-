@@ -71,7 +71,7 @@ class Contenedor {
             data = JSON.parse(data)
             const wanted = data.filter(condition => condition.id == number)
             if(wanted.length > 0) {
-                return wanted
+                return wanted[0]
             } else {
                 console.log("null");
                 return null
@@ -80,7 +80,7 @@ class Contenedor {
             console.log(err)
         }
     }
-
+    
     async getAll() {
         const file = this.file
         try {
@@ -97,7 +97,7 @@ class Contenedor {
         try {
             let data = await fs.promises.readFile(file, 'utf-8')
             data = JSON.parse(data)
-            data = data.filter(condition => condition.id !== number)
+            data = data.filter(condition => condition.id != number)
             const newData = JSON.stringify(data)
             await fs.promises.writeFile(file, newData)
         } catch(err) {
@@ -113,6 +113,23 @@ class Contenedor {
             console.log(err)
         }
     }
+
+    async update(id, obj) {
+        const file = this.file
+        try {
+            let list = await fs.promises.readFile(file)
+            list = JSON.parse(list)
+            const i = list.findIndex(wanted => wanted.id == id)
+            obj.id = list[i].id
+            list[i] = obj
+            list = JSON.stringify(list)
+            fs.promises.writeFile(file, list)
+            return obj
+        } catch(err) {
+            return null
+        }
+    }
+
 }
 
 module.exports = Contenedor
