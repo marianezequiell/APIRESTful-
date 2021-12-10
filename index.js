@@ -10,13 +10,12 @@ app.use(express.urlencoded({ extended: true }))
 app.use('/', express.static(__dirname + '/public'))
 
 let seeProducts = new Contenedor('productos')
-let data
-(async function getData () {
-    data = await seeProducts.getAll()
-})()
 
 router.get('/', (req, res) => {
-    res.send(JSON.stringify(data))
+    (async function getData () {
+        let data = await seeProducts.getAll()
+        res.send(data)
+    })()
 })
 
 router.get('/:id', async (req, res) => {
@@ -35,15 +34,21 @@ router.post('/', async (req, res) => {
 })
 
 router.delete('/:id', async (req, res) => {
-    await seeProducts.deleteById(req.params.id)
-    res.send("Eliminación correcta")
+
+    let result = await seeProducts.getById(req.params.id)
+    if(result === null) {
+        res.send(result = { error : 'producto no encontrado' })
+    } else {
+        await seeProducts.deleteById(req.params.id)
+        res.send("Eliminación correcta")    
+    }
 })
 
 router.put('/:id', async (req, res) => {
     const id = req.params.id
     const result = await seeProducts.update(id, req.body)
     
-    result != null ? res.send("Producto actualizado") : (res.send("ID no válida"), console.log("ID no válida"))
+    result != null ? res.send("Producto actualizado") : (res.send({ error : 'producto no encontrado' }), console.log({ error : 'producto no encontrado' }))
 })
 
 app.use('/api/productos', router)
